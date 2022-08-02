@@ -8,13 +8,13 @@ $extension = pathinfo($filename, PATHINFO_EXTENSION);
 
 if (in_array($extension, array('jpg','jpeg','gif','png')))
 {
-        echo "<img src=\"$filename\" alt=\"$filename\" style=\"max-width: 100%; max-height: 1000%; margin: auto;\">";
+        echo "<img style=\"max-width: 100%; height: auto;\" src=\"$filename\" alt=\"$filename\">";
         echo "<br />";
         echo "<a href=\"$filename\"> Direct link </a>";
 }
 else if (in_array($extension, array('mp4','mov','webm')))
 {
-        echo "<video src=\"$filename\" alt=\"$filename\" controls style=\"max-width: 100%; max-height: 100%; margin: auto;\">";
+        echo "<video controls style=\"max-width: 100%; height: auto;\"> <source src=\"$filename\" alt=\"$filename\"></video>";
         echo "<br />";
         echo "<a href=\"$filename\"> Direct link </a>";
 }
