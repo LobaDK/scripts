@@ -1,10 +1,14 @@
 import os
 
-for path, currentDirectory, files in os.walk("CHANGEME"):
+for path, currentDirectory, files in os.walk("D:\OBS"):
     for file in files:
-        extension = os.path.splitext(file)
-        if extension[1] == extension[1].upper():
+        extension = os.path.splitext(file)[1]
+        if not extension:
+            continue
+        if extension == extension.upper():
             file_without_ext, ext = os.path.splitext(file)
+            if not file_without_ext:
+                continue
             ext = ext.lower()
             newfile = file_without_ext + ext
             print(f'renaming {os.path.join(path, file)} to {os.path.join(path,newfile)}')
