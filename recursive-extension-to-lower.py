@@ -18,6 +18,6 @@ for path, currentDirectory, files in os.walk("D:\OBS"):
                 print("Error renaming file. Original filename and path has been logged to 'failedrename.log")
                 try:
                     with open('failedrename.log', 'a') as f:
-                        f.write(os.path.join(path, file))
+                        f.write(f'{os.path.join(path, file)}\n')
                 except:
                     print('Writting to log failed')
