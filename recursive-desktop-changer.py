@@ -5,7 +5,7 @@ import random
 import time
 import winreg
 
-set_wallpaper_style = False #default to False
+set_wallpaper_style = True #default to False
 if set_wallpaper_style: #if true, set the wallpaper style to be resized and cropped to fill the screen, while keeping the aspect ratio
     reg_path = r'Control Panel\Desktop\\' #store sub_key location
 
