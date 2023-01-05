@@ -2,30 +2,32 @@ from os import path
 import time
 import signal
 import multiprocessing
-import queue
+from queue import Empty
 import traceback
 import subprocess
 from glob import glob
 from tqdm import tqdm
 
 # multiprocessing.Event() is like a boolean that can be checked over multiple processes.
-shutdown_event = multiprocessing.Event()
+#shutdown_event = multiprocessing.Event()
 def signal_handler(sig, frame):
     print("Waiting for last files.")
     global shutdown_event
     shutdown_event.set()
 
-signal.signal(signal.SIGINT, signal_handler)
-signal.signal(signal.SIGINT, signal.SIG_IGN)
+def update_bar(shutdown_event, q, fileCount):
+    pbar = tqdm(total=fileCount, unit='files')
 
-def update_bar(q, files):
-    pbar = tqdm(total=len(files))
+    while not shutdown_event.is_set():
+        try:
+            x = q.get()
+            pbar.update(x)
+        except KeyboardInterrupt:
+            pass
 
-    while True:
-        x = q.get()
-        pbar.update(x)
-
-def ffmpegThread(inQueue, bar_queue):
+def ffmpegThread(shutdown_event, inQueue, bar_queue):
+    #signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
 
     # There's a try around everything so if something breaks it doesn't stop all the other threads.
     try:
@@ -40,26 +42,30 @@ def ffmpegThread(inQueue, bar_queue):
                 file = inQueue.get(timeout=10)
                 
                 if path.isfile(file[1][3]):
-                    p = subprocess.run(file[1], stderr=subprocess.PIPE)
-
+                    si = subprocess.STARTUPINFO()
+                    si.dwFlags = subprocess.CREATE_BREAKAWAY_FROM_JOB | subprocess.CREATE_NO_WINDOW | subprocess.DETACHED_PROCESS
+                    time.sleep(1)
+                    #p = subprocess.Popen(file[1], stderr=subprocess.PIPE, creationflags=subprocess.DETACHED_PROCESS)
+                    #time.sleep(1)
+                    #p.communicate()
                     # FFmpeg steals the 'CTRL + C', or SIGINT, signal even when signal.signal is used
                     # So a mix of checking the returncode and output of ffmpeg is used instead
-                    if p.returncode == 0:
-                        pass
-                    elif p.returncode != 0 and 'already exists' in p.stderr.decode():
-                        pass
-                    elif p.returncode != 0 and  'Exiting normally' in p.stderr.decode():
-                        shutdown_event.set()
-                    elif p.returncode == 3221225786 and p.stderr.decode() == '':
-                        shutdown_event.set()
-                    else:
-                        print('Error detected in ffmpeg, stopping...')
-                        shutdown_event.set()
+                    # if p.returncode == 0:
+                    #     pass
+                    # elif p.returncode != 0 and 'already exists' in p.stderr.decode():
+                    #     pass
+                    # elif p.returncode != 0 and  'Exiting normally' in p.stderr.decode():
+                    #     shutdown_event.set()
+                    # elif p.returncode == 3221225786 and p.stderr.decode() == '':
+                    #     shutdown_event.set()
+                    # else:
+                    #     print('Error detected in ffmpeg, stopping...')
+                    #     shutdown_event.set()
                     
                     if not shutdown_event.is_set():
                         bar_queue.put(1, block=False)
                     
-            except queue.Empty:
+            except Empty:
                 print("inQueue Empty")
                 break
                 
@@ -71,6 +77,8 @@ def ffmpegThread(inQueue, bar_queue):
 
 
 if __name__ == '__main__':
+    signal.signal(signal.SIGINT, signal_handler)
+    shutdown_event = multiprocessing.Event()
     # Queues are the multiprocessing version of lists.
     inQueue = multiprocessing.Queue()
     bar_queue = multiprocessing.Queue()
@@ -83,15 +91,16 @@ if __name__ == '__main__':
         command = ['ffmpeg', '-n', '-i', file, '-b:a', '192k', path.join(r'C:\Users\nichel\Music\test', path.basename(file) + '.mp3')]
         inQueue.put([fileCount, command])
     
-    threadCount = 12
+    threadCount = 1
     processList = []
 
-    bar_process = multiprocessing.Process(target=update_bar, args=(bar_queue, files), daemon=True)
-    bar_process.start()
+    p = multiprocessing.Process(target=update_bar, args=(shutdown_event, bar_queue, fileCount), daemon=True)
+    p.start()
+    processList.append(p)
 
     # Create and start all the threads
     for i in range(threadCount):
-        p = multiprocessing.Process(target=ffmpegThread, args=(inQueue, bar_queue))
+        p = multiprocessing.Process(target=ffmpegThread, args=(shutdown_event, inQueue, bar_queue), daemon=True)
         p.start()
         processList.append(p)
     
@@ -105,7 +114,7 @@ if __name__ == '__main__':
     try:
         while True:
             _ = inQueue.get(block=False)
-    except queue.Empty:
+    except Empty:
         pass
 
     print("Exited.")
