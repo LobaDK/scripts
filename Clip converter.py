@@ -5,6 +5,8 @@ import logging
 # Set logger settings
 logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', datefmt='%d-%b-%y %H:%M:%S', filename='converter.log', filemode='a', level=logging.DEBUG)
 
+output_folder = 'AV1'
+
 # Iterate through my clips folder structure
 # Recordings
 #     └Name of the game
@@ -27,8 +29,8 @@ for root, dirs, files in walk(r'E:\Recordings'):
                 # containing the path for the converted folder
                 # and a variable containing the path as well as filename
                 # for the new converted file
-                dirname_converted = path.join(root, 'converted')
-                filename_converted = path.join(root, "converted", f"{path.splitext(filename)[0]}.mp4")
+                dirname_converted = path.join(root, output_folder)
+                filename_converted = path.join(root, output_folder, f"{path.splitext(filename)[0]}.mp4")
 
                 # Check if the folder for converted clips does not exist
                 # and create it, as well as log it, if it does not
@@ -49,7 +51,7 @@ for root, dirs, files in walk(r'E:\Recordings'):
                 if path.exists(filename_converted):
                     if stat(filename_converted).st_size <= 1_048_576:
                         remove(filename_converted)
-                        logging.info(f'Removed {filename_converted} due to being 1 megabyte or less bytes in size')
+                        logging.info(f'Removed {filename_converted} due to being 1 megabyte or less in size')
                     
                     else:
                         logging.info(f'Skipping {filename_converted}. Reason: Already exists')
@@ -61,7 +63,7 @@ for root, dirs, files in walk(r'E:\Recordings'):
                 
                 # Create a list with ffmpeg and it's paramters for a near-lossless h264 encoding
                 cmd = ['ffmpeg', '-n', '-i', f'{path.join(root, dirname, filename)}', '-c:v',
-                       'libx264', '-preset', 'veryslow', '-crf', '20', '-b:v', '0', '-c:a', 'aac', '-b:a',
+                       'libsvtav1', '-preset', '4', '-crf', '45', '-b:v', '0', '-c:a', 'aac', '-b:a',
                        '192k', '-movflags', '+faststart',
                        filename_converted]
 
