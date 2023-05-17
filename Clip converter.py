@@ -61,7 +61,9 @@ for root, dirs, files in walk(r'E:\Recordings'):
                 print(f'\nConverting {path.join(root, dirname, filename)}\n')
                 logging.info(f'\nConverting {path.join(root, dirname, filename)}.\n')
                 
-                # Create a list with ffmpeg and it's paramters for a near-lossless h264 encoding
+                # Create a list with ffmpeg and it's paramters, for a high-quality medium-slow AV1 encoding
+                # a CRF of 45 may seem too high, but it's the perfect mix between
+                # low filesize and good-enough quality for online sharing.
                 cmd = ['ffmpeg', '-n', '-i', f'{path.join(root, dirname, filename)}', '-c:v',
                        'libsvtav1', '-preset', '4', '-crf', '45', '-b:v', '0', '-c:a', 'aac', '-b:a',
                        '192k', '-movflags', '+faststart',
