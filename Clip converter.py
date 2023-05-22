@@ -59,7 +59,7 @@ for root, dirs, files in walk(r'E:\Recordings'):
                 
                 # Let the user know which file is about to be converted, and log it
                 print(f'\nConverting {path.join(root, dirname, filename)}\n')
-                logging.info(f'\nConverting {path.join(root, dirname, filename)}.\n')
+                logging.info(f'Converting {path.join(root, dirname, filename)}.')
                 
                 # Create a list with ffmpeg and it's paramters, for a high-quality medium-slow AV1 encoding
                 # a CRF of 45 may seem too high, but it's the perfect mix between
@@ -79,4 +79,4 @@ for root, dirs, files in walk(r'E:\Recordings'):
 
         # Log folders ignored by the script
         else:
-            logging.info(f'\nIgnoring folder {path.join(root, dirname)}.')
+            logging.info(f'Ignoring folder {path.join(root, dirname)}.')
