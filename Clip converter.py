@@ -29,18 +29,18 @@ try:
                 # If folder is empty, an empty list will be returned, and thus not run
                 for filename in listdir(path.join(root, dirname)):
 
-                    # I exlusively work with the mp4 and mkv containers.
-                    # If the file does not have either, assume it should be ignored
-                    if path.splitext(filename)[1].casefold() == ('.mkv' or '.mp4'):
-                        logging.info(f'Skipping {filename_converted}. Reason: Not an mp4 or mkv container')
-                        continue
-
                     # Use the root folder variable to create a variable
                     # containing the path for the converted folder
                     # and a variable containing the path as well as filename
                     # for the new converted file
                     dirname_converted = path.join(root, output_folder)
                     filename_converted = path.join(root, output_folder, f"{path.splitext(filename)[0]}.mp4")
+
+                    # I exlusively work with the mp4 and mkv containers.
+                    # If the file does not have either, assume it should be ignored
+                    if path.splitext(filename)[1].casefold() == ('.mkv' or '.mp4'):
+                        logging.info(f'Skipping {filename_converted}. Reason: Not an mp4 or mkv container')
+                        continue
 
                     # Check if the folder for converted clips does not exist
                     # and create it, as well as log it, if it does not
