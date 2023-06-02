@@ -61,7 +61,7 @@ while True:
               # Add only the new frames by subtracting the total converted with the total progress
               progress_bar.update(int(stdout.split('=')[1]) - progress_bar.n)
        
-       # If the current string in out output instead is the returned progress type.
+       # If the current string in our output instead is the returned progress type.
        # ffmpeg uses this to display if it's done or not, by being either "continue"
        # or "end"
        if 'progress=' in stdout:
@@ -69,6 +69,7 @@ while True:
               # if the progress is end, it means it's done converting, and we can break out of the loop
               if stdout.split('=')[1] == 'end': break
 
+       # If the process exited due to the file already existing
        if 'already exists' in stdout:
               break
 
