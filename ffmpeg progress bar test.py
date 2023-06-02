@@ -43,7 +43,7 @@ progress_bar = tqdm(total=frames, unit='frames', desc=f'Converting {Path(file).s
 # Reading from stderr if there is nothing will lock up the script
 # so we're instead piping stderr to stdout as we know something
 # will always be written to it, and then handling the logic from there
-p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, )
+p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
 # Run an infinite loop
 while True:
