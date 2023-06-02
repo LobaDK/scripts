@@ -6,16 +6,16 @@ from pathlib import Path
 file = r"C:\Users\nichel\Downloads\Recordings\Grand Theft Auto V\GTA5 Scramjet vs nerfed Oppressor mk2 2023-02-05 23-21-28.mp4"
 
 # command for converting the file.
-# We use "-v quiet" to hide the normal output.
+# We use "-v fatal" to hide everything except fatal exits.
 # "-progress" to instead display a bunch 
 # of lines with data that constantly updates
 # and the "-" right after to pipe it to stdout
 cmd = [r"C:\Users\nichel\Downloads\Recordings\Grand Theft Auto V\ffmpeg.exe",
-       '-y',
+       '-n',
        '-i',
        file,
        '-v',
-       'quiet',
+       'fatal',
        '-progress',
        '-',
        '-c:v',
@@ -39,8 +39,11 @@ frames = int(loads(pp.stdout)['streams'][0]['nb_frames'])
 # Create the progress bar
 progress_bar = tqdm(total=frames, unit='frames', desc=f'Converting {Path(file).stem}')
 
-# Start ffmpeg process in the background and pipe the outputs
-p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+# Start ffmpeg process in the background and pipe the outputs.
+# Reading from stderr if there is nothing will lock up the script
+# so we're instead piping stderr to stdout as we know something
+# will always be written to it, and then handling the logic from there
+p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, )
 
 # Run an infinite loop
 while True:
@@ -65,5 +68,8 @@ while True:
 
               # if the progress is end, it means it's done converting, and we can break out of the loop
               if stdout.split('=')[1] == 'end': break
+
+       if 'already exists' in stdout:
+              break
 
 progress_bar.close()
