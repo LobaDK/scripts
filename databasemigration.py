@@ -23,13 +23,6 @@ class oldquantumkatdb:
 
 
 class newquantumkatdb:
-    class authenticated_servers(BaseModel):
-        id: int
-        server_id: int
-        authenticated_by_id: int
-        requested_by_id: int
-        is_authenticated: int
-
     class chat(BaseModel):
         id: int
         user_id: int
@@ -47,6 +40,8 @@ class newquantumkatdb:
     class servers(BaseModel):
         server_id: int
         server_name: str
+        is_authorized: int
+        is_banned: int
 
 
 def read_db(db: sqlite3.Connection, table_name: str):
@@ -58,8 +53,8 @@ def read_db(db: sqlite3.Connection, table_name: str):
 old_db = sqlite3.connect("./../oldquantumkat.db")
 new_db = sqlite3.connect("./../quantumkat.db")
 
-old_db_tables = ["authenticated_servers", "chat"]
-new_db_tables = ["authenticated_servers", "chat", "users", "servers"]
+old_db_tables = ["chat"]
+new_db_tables = ["chat", "users", "servers"]
 
 for table in old_db_tables:
     old_data = read_db(old_db, table)
@@ -67,12 +62,11 @@ for table in old_db_tables:
     for row in old_data:
         if table == "authenticated_servers":
             new_data.append(
-                newquantumkatdb.authenticated_servers(
-                    id=row[0],
+                newquantumkatdb.servers(
                     server_id=row[1],
-                    authenticated_by_id=row[3],
-                    requested_by_id=row[3],
-                    is_authenticated=row[5],
+                    server_name=row[2],
+                    is_authorized=row[5],
+                    is_banned=0,
                 )
             )
         elif table == "chat":
